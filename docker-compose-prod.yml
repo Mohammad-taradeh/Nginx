@@ -1,0 +1,9 @@
+version: '3'
+services:
+  web:
+    image: ghcr.io/mohammad-taradeh/express-docker:57c8022:$GIT_VERSION
+    restart: slways
+    container_name: botato
+    build: .
+    ports:
+      - "8080:80"
