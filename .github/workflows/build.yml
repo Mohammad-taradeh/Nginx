@@ -27,7 +27,7 @@ jobs:
         with:
           registry: ghcr.io
           username: Mohammad-taradeh
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build  Docker image
         run: docker build . --file Dockerfile -t mohammad-taradeh/My-Website-In-Nginx:${{steps.image_version.outputs.gitsha}}
