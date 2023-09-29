@@ -1,10 +1,10 @@
-FROM nginx
+FROM nginx:alpine
 
 WORKDIR /usr/app
 
-COPY ./index.html /usr/share/nginx/html
+COPY . /usr/share/nginx/html/
 
 
 EXPOSE 80
 
-CMD [ "nginx", "-g", "deamon off;" ]
+CMD [ "nginx", "-g", "deamon off" ]

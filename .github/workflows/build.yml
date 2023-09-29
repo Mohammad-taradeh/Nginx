@@ -1,32 +1,48 @@
-name: Docker Publish
+name: Build and Publish Docker Image
 
 on:
   push:
-    branches: ["main"]
-  pull_request: 
-    branches: ["main"]
-    
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - uses: actions/checkout@v3
+      - name: set image version (tag)
+        id: image_version
+        run: echo "gitsha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: mohammad-taradeh/nginx:latest
+      - name: Build  Docker image
+        run: docker build . --file Dockerfile -t mohammad-taradeh/my-static-website:${{steps.image_version.outputs.gitsha}}
+          
+      - name:  Publish Docker image
+        run: docker push mohammad-taradeh/my-static-website:${{steps.image_version.outputs.gitsha}}
+          
+      - name: configure docker host 
+        uses: khaledez/configure-docker-host@v1
+        with:
+          host: 44.204.71.82
+          user: github
+          ssh-private-key: ${{secrets.DEPLOYMENT_KEY}}
+      
+      - name: deploy
+        run: docker compose -f docker-compose-prod.yml up -d
+        env:
+          GIT_VERSION: ${{steps.image_version.outputs.gitsha}}       
+      
+      - name: print logs
+        if: always()
+        run : docker compose logs     

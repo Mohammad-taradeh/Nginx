@@ -1,9 +1,14 @@
 version: '3'
 services:
   web:
-    image: ghcr.io/mohammad-taradeh/express-docker:57c8022:$GIT_VERSION
-    restart: slways
-    container_name: botato
-    build: .
+    image: mohammad-taradeh/my-static-website:$GIT_VERSION
     ports:
-      - "8080:80"
+      - "80:80"
+    environment:
+      - NGINX_ENV=production
+    networks:
+      - production_network
+
+# networks:
+#   production_network:
+#     driver: bridge
